@@ -15,6 +15,8 @@ spec:
       labels:
         app: mashinato-bot
     spec:
+      nodeSelector:
+        kubernetes.io/arch: amd64
       containers:
         - name: bot
           image: aminsaedi/mashinato-bot:latest

@@ -8,4 +8,4 @@ resources:
   - deployment.yaml
   - service.yaml
   - configmap.yaml
-  - secret.yaml
+  # secret.yaml is managed manually via kubectl (contains real credentials)
