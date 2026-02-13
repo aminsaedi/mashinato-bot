@@ -20,24 +20,44 @@ logger = logging.getLogger(__name__)
 router = Router()
 
 
+STATE_LABELS = {
+    "Upcoming": "رزرو شده",
+    "Started": "در حال سفر",
+    "Completed": "تکمیل شده",
+    "Cancelled": "لغو شده",
+}
+
+
+def _fmt_time(iso: str | None) -> str:
+    """Extract HH:MM from ISO datetime string."""
+    if not iso:
+        return "?"
+    try:
+        # "2026-02-13T16:04:18Z" → "16:04"
+        return iso.split("T")[1][:5]
+    except (IndexError, AttributeError):
+        return str(iso)
+
+
 def format_rental(rental: dict) -> str:
     """Format rental data into Persian text."""
-    vehicle = rental.get("vehicle", rental)
-    model = vehicle.get("model", vehicle.get("vehicleModel", "?"))
-    number = vehicle.get("vehicle_nb", vehicle.get("vehicleNumber", "?"))
-    status = rental.get("status", rental.get("rentalStatus", "?"))
+    vehicle = rental.get("vehicle", {})
+    model = vehicle.get("model") or vehicle.get("make") or "?"
+    number = vehicle.get("vehicleNb", vehicle.get("vehicle_nb", "?"))
+    state = rental.get("state", rental.get("status", "?"))
+    state_fa = STATE_LABELS.get(state, state)
 
     lines = [fa.RENTAL_TITLE]
     lines.append(fa.RENTAL_VEHICLE.format(model=model, number=number))
-    if "startTime" in rental or "start_time" in rental:
-        lines.append(
-            fa.RENTAL_START_TIME.format(time=rental.get("startTime", rental.get("start_time", "")))
-        )
-    if "endTime" in rental or "end_time" in rental:
-        lines.append(
-            fa.RENTAL_END_TIME.format(time=rental.get("endTime", rental.get("end_time", "")))
-        )
-    lines.append(fa.RENTAL_STATUS.format(status=status))
+
+    start = rental.get("reservedStartDate", rental.get("startTime"))
+    end = rental.get("reservedEndDate", rental.get("endTime"))
+    if start:
+        lines.append(fa.RENTAL_START_TIME.format(time=_fmt_time(start)))
+    if end:
+        lines.append(fa.RENTAL_END_TIME.format(time=_fmt_time(end)))
+
+    lines.append(fa.RENTAL_STATUS.format(status=state_fa))
     return "\n".join(lines)
 
 
@@ -60,6 +80,13 @@ async def show_current_rental(callback: CallbackQuery, user: User, **kwargs) -> 
                 format_rental(rental),
                 reply_markup=rental_actions_keyboard(account),
             )
+            # Send vehicle location if available
+            vehicle = rental.get("vehicle", {})
+            loc = vehicle.get("vehicleLocation", {})
+            lat = loc.get("latitude")
+            lng = loc.get("longitude")
+            if lat and lng:
+                await callback.message.answer_location(latitude=lat, longitude=lng)
     except APIError as e:
         if e.status_code == 404:
             await callback.message.edit_text(
