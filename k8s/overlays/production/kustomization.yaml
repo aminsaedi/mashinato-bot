@@ -7,4 +7,5 @@ resources:
 
 images:
   - name: aminsaedi/mashinato-bot
+    newName: ghcr.io/aminsaedi/mashinato-bot
     newTag: latest
