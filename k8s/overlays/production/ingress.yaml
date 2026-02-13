@@ -1,0 +1,24 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: mashinato-bot
+  namespace: car-api
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.tls: "true"
+spec:
+  tls:
+    - hosts:
+        - kuber-mashinato-bot.aminamin.xyz
+      secretName: wildcard-aminamin-xyz-tls
+  rules:
+    - host: kuber-mashinato-bot.aminamin.xyz
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: mashinato-bot
+                port:
+                  number: 8080
