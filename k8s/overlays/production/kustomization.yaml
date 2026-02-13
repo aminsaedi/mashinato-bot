@@ -8,4 +8,4 @@ resources:
 images:
   - name: aminsaedi/mashinato-bot
     newName: ghcr.io/aminsaedi/mashinato-bot
-    newTag: 410e84aa9a30236117ee1732270379e9159ce813
+    newTag: 821f38d614a22065dba961a1a715b39dedda3683
