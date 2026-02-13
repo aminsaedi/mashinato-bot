@@ -45,10 +45,9 @@ def radius_keyboard() -> InlineKeyboardMarkup:
 def filters_keyboard(filters: dict[str, bool]) -> InlineKeyboardMarkup:
     """Build toggle-able filter buttons."""
     filter_labels = {
-        "exclude_prius": fa.SEARCH_FILTER_NO_PRIUS,
-        "exclude_ev": fa.SEARCH_FILTER_NO_EV,
-        "exclude_low_battery": fa.SEARCH_FILTER_NO_LOW_BATTERY,
-        "snow_promotion": fa.SEARCH_FILTER_SNOW,
+        "no_prius": fa.SEARCH_FILTER_NO_PRIUS,
+        "no_ev": fa.SEARCH_FILTER_NO_EV,
+        "snow_car": fa.SEARCH_FILTER_SNOW,
     }
     rows = []
     for key, label in filter_labels.items():

@@ -162,9 +162,13 @@ async def fuel_card(callback: CallbackQuery, callback_data: RentalCB, user: User
     api = CarAPI(user.access_token)
     try:
         result = await api.get_fuel_card(callback_data.account)
-        pin = result.get("pin", result.get("cardNumber", "?"))
+        pin = result.get("fourDigitPin", result.get("pin", "?"))
+        card = result.get("cardNumber", "")
+        pin_text = fa.RENTAL_FUEL_PIN.format(pin=pin)
+        if card:
+            pin_text += f"\n💳 شماره کارت: {card}"
         await callback.message.edit_text(
-            fa.RENTAL_FUEL_PIN.format(pin=pin),
+            pin_text,
             reply_markup=rental_actions_keyboard(callback_data.account),
         )
     except APIError as e:

@@ -76,10 +76,9 @@ async def start_search_wizard(
     await state.update_data(
         account=user.selected_account,
         filters={
-            "exclude_prius": True,
-            "exclude_ev": False,
-            "exclude_low_battery": False,
-            "snow_promotion": False,
+            "no_prius": True,
+            "no_ev": False,
+            "snow_car": False,
         },
     )
     await callback.message.edit_text(fa.SEARCH_SEND_LOCATION)

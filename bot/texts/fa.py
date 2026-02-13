@@ -36,7 +36,6 @@ SEARCH_SELECT_RADIUS = "📏 شعاع جستجو را انتخاب کنید:"
 SEARCH_FILTERS_TITLE = "🔧 فیلترهای جستجو:"
 SEARCH_FILTER_NO_PRIUS = "بدون پریوس"
 SEARCH_FILTER_NO_EV = "بدون برقی"
-SEARCH_FILTER_NO_LOW_BATTERY = "بدون باتری کم"
 SEARCH_FILTER_SNOW = "پروموشن برف"
 SEARCH_START = "▶️ شروع جستجو"
 SEARCH_STOP = "⏹ توقف جستجو"
@@ -49,7 +48,7 @@ SEARCH_STATUS_TITLE = "🔍 وضعیت جستجو"
 SEARCH_STATUS_RUNNING = "در حال جستجو..."
 SEARCH_STATUS_FOUND = "✅ خودرو پیدا شد!"
 SEARCH_STATUS_STOPPED = "متوقف شده"
-SEARCH_SUMMARY = "📍 موقعیت: {lat}, {lng}\n" "📏 شعاع: {radius} متر\n" "🔧 فیلترها: {filters}"
+SEARCH_SUMMARY = "📍 موقعیت: {lat}, {lng}\n" "📏 شعاع: {radius} کیلومتر\n" "🔧 فیلترها: {filters}"
 SEARCH_CUSTOM_RADIUS = "سفارشی..."
 SEARCH_RADIUS_PROMPT = "شعاع را به متر وارد کنید:"
 
