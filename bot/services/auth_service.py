@@ -89,12 +89,18 @@ async def handle_oauth_callback(bot: Bot, code: str, state: str) -> None:
         groups = claims.get("groups", [])
 
         # Extract accessible accounts from groups (format: "communauto:name")
-        accounts = list(dict.fromkeys(
-            g.split(":", 1)[1]
-            for g in groups
-            if g.startswith("communauto:") and g != f"communauto:{settings.admin_group}"
-        ))
-        is_admin = settings.admin_group in groups or f"communauto:{settings.admin_group}" in groups
+        accounts = list(
+            dict.fromkeys(
+                g.split(":", 1)[1]
+                for g in groups
+                if g.startswith("communauto:")
+                and g != f"communauto:{settings.admin_group}"
+            )
+        )
+        is_admin = (
+            settings.admin_group in groups
+            or f"communauto:{settings.admin_group}" in groups
+        )
 
         # Store/update user
         result = await session.execute(select(User).where(User.telegram_id == telegram_id))
