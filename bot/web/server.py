@@ -60,19 +60,24 @@ async def oauth_callback_handler(request: web.Request) -> web.Response:
 
 async def webhook_receiver_handler(request: web.Request) -> web.Response:
     """Receive webhook notifications from car-api-py."""
+    body = await request.read()
+
     if settings.webhook_secret:
         signature = request.headers.get("X-Webhook-Signature", "")
-        body = await request.read()
+        timestamp = request.headers.get("X-Webhook-Timestamp", "")
+        # Backend signs "{timestamp}.{payload}" and sends "sha256={hex}"
+        message = f"{timestamp}.{body.decode()}"
         expected = hmac.new(
-            settings.webhook_secret.encode(),
-            body,
+            settings.webhook_secret.encode("utf-8"),
+            message.encode("utf-8"),
             hashlib.sha256,
         ).hexdigest()
-        if not hmac.compare_digest(signature, expected):
+        received = signature.removeprefix("sha256=")
+        if not hmac.compare_digest(received, expected):
+            logger.warning("Webhook signature mismatch")
             return web.json_response({"error": "invalid signature"}, status=401)
-        data = json.loads(body)
-    else:
-        data = await request.json()
+
+    data = json.loads(body)
 
     from bot.notifications.dispatcher import dispatch_notification
 

@@ -25,35 +25,63 @@ def format_event(event_type: str, data: dict) -> str | None:
     if formatter:
         return formatter(data)
 
-    payload = data.get("payload", {})
+    # Backend sends {"id", "type", "timestamp", "data": {...}}
+    payload = data.get("data", data.get("payload", data))
+
+    def _vehicle_str(v: dict) -> str:
+        model = v.get("model", "?")
+        nb = v.get("vehicle_nb", v.get("number", "?"))
+        return f"{model} #{nb}"
 
     if event_type.startswith("search."):
         vehicle = payload.get("vehicle", {})
-        vehicle_str = f"{vehicle.get('model', '?')} #{vehicle.get('number', '?')}"
-        location = payload.get("location", "?")
+        account = payload.get("account", "?")
         if event_type == "search.completed":
-            return fa.NOTIF_SEARCH_COMPLETED.format(vehicle=vehicle_str, location=location)
+            return fa.NOTIF_SEARCH_COMPLETED.format(vehicle=_vehicle_str(vehicle), location=account)
+        if event_type == "search.started":
+            return f"🔍 جستجو شروع شد\nحساب: {account}"
+        if event_type == "search.stopped":
+            return f"⏹ جستجو متوقف شد\nحساب: {account}"
+        if event_type == "search.error":
+            error = payload.get("error", "خطای نامشخص")
+            return f"❌ خطا در جستجو\nحساب: {account}\n{error}"
 
     if event_type.startswith("rental."):
         vehicle = payload.get("vehicle", {})
-        vehicle_str = f"{vehicle.get('model', '?')} #{vehicle.get('number', '?')}"
-        if event_type == "rental.booked":
-            return fa.NOTIF_RENTAL_BOOKED.format(vehicle=vehicle_str)
+        account = payload.get("account", "?")
+        vs = _vehicle_str(vehicle)
+        if event_type in ("rental.created", "rental.booked"):
+            return fa.NOTIF_RENTAL_BOOKED.format(vehicle=vs)
+        if event_type == "rental.cancelled":
+            return f"❌ اجاره لغو شد\n🚗 {vs}\nحساب: {account}"
+        if event_type == "rental.trip_started":
+            return f"▶️ سفر شروع شد\n🚗 {vs}\nحساب: {account}"
+        if event_type == "rental.trip_ended":
+            return f"⏹ سفر پایان یافت\n🚗 {vs}\nحساب: {account}"
+        if event_type == "rental.extended":
+            return f"⏰ اجاره تمدید شد\n🚗 {vs}\nحساب: {account}"
+        if event_type == "rental.transferred":
+            to_account = payload.get("to_account", "?")
+            return f"🔄 اجاره انتقال یافت\n🚗 {vs}\nاز: {account} → به: {to_account}"
 
     if event_type.startswith("optimization."):
         vehicle = payload.get("vehicle", {})
-        vehicle_str = f"{vehicle.get('model', '?')} #{vehicle.get('number', '?')}"
         score = payload.get("score", "?")
         if event_type == "optimization.swap":
-            return fa.NOTIF_OPTIMIZATION_SWAP.format(vehicle=vehicle_str, score=score)
+            return fa.NOTIF_OPTIMIZATION_SWAP.format(vehicle=_vehicle_str(vehicle), score=score)
 
     return f"🔔 {event_type}\n{json.dumps(payload, ensure_ascii=False, indent=2)[:500]}"
 
 
 async def dispatch_notification(bot: Bot, data: dict) -> None:
-    """Dispatch a webhook event to subscribed users."""
-    event_type = data.get("event", data.get("event_type", "unknown"))
-    account = data.get("account", data.get("account_name"))
+    """Dispatch a webhook event to subscribed users.
+
+    The backend sends: {"id": "evt_...", "type": "search.completed",
+                        "timestamp": "...", "data": {"account": "...", ...}}
+    """
+    event_type = data.get("type", data.get("event", data.get("event_type", "unknown")))
+    event_data = data.get("data", data)
+    account = event_data.get("account", data.get("account", data.get("account_name")))
 
     message = format_event(event_type, data)
     if not message:
