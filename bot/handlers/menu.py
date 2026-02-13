@@ -1,7 +1,8 @@
 """Main menu navigation handler."""
 
 from aiogram import F, Router
-from aiogram.types import CallbackQuery
+from aiogram.filters import Command
+from aiogram.types import CallbackQuery, Message
 
 from bot.callbacks.factory import MenuCB
 from bot.db.models import User
@@ -9,6 +10,29 @@ from bot.keyboards.main_menu import main_menu_keyboard
 from bot.texts import fa
 
 router = Router()
+
+
+@router.message(Command("menu"))
+async def cmd_menu(message: Message, user: User, **kwargs) -> None:
+    account = user.selected_account or user.authentik_username or ""
+    text = f"{fa.MAIN_MENU_TITLE}\n{fa.ACTIVE_ACCOUNT.format(account=account)}"
+    await message.answer(
+        text,
+        reply_markup=main_menu_keyboard(is_admin=bool(user.is_admin)),
+    )
+
+
+@router.message(Command("help"))
+async def cmd_help(message: Message, **kwargs) -> None:
+    await message.answer(
+        "🤖 <b>راهنمای ربات ماشیناتو</b>\n\n"
+        "/start - شروع و منوی اصلی\n"
+        "/menu - منوی اصلی\n"
+        "/login - ورود به حساب\n"
+        "/logout - خروج از حساب\n"
+        "/help - این راهنما\n\n"
+        "از دکمه‌های زیر پیام‌ها برای ناوبری استفاده کنید."
+    )
 
 
 @router.callback_query(MenuCB.filter(F.action == "main"))

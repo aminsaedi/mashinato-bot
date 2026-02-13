@@ -5,6 +5,7 @@ from aiogram import Bot, Dispatcher
 from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
 from aiogram.fsm.storage.memory import MemoryStorage
+from aiogram.types import BotCommand
 from aiohttp import web
 
 from bot.config import settings
@@ -88,6 +89,17 @@ async def main() -> None:
     dp = Dispatcher(storage=MemoryStorage())
     setup_middlewares(dp)
     setup_routers(dp)
+
+    # Register bot commands (slash commands in Telegram menu)
+    await bot.set_my_commands(
+        [
+            BotCommand(command="start", description="شروع / منوی اصلی"),
+            BotCommand(command="login", description="ورود به حساب"),
+            BotCommand(command="logout", description="خروج از حساب"),
+            BotCommand(command="menu", description="منوی اصلی"),
+            BotCommand(command="help", description="راهنما"),
+        ]
+    )
 
     # Start aiohttp web server (OAuth callback + webhook receiver + health)
     webapp = create_app(bot=bot)
