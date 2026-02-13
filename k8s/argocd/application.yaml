@@ -11,7 +11,7 @@ spec:
     path: k8s/overlays/production
   destination:
     server: https://kubernetes.default.svc
-    namespace: car-api
+    namespace: mashinato-bot
   syncPolicy:
     automated:
       prune: true

@@ -2,7 +2,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: mashinato-bot
-  namespace: car-api
+  namespace: mashinato-bot
   labels:
     app: mashinato-bot
 spec:
